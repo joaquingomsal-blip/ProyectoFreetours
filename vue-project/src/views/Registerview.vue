@@ -1,32 +1,44 @@
 <script>
+import { ref } from 'vue';
+import router from '@/router';
 
+const form = ref({
+    name: '',
+    email: '',
+    password: ''
+})
+
+function register() {
+const data = { name: form.value.name, email: form.value.email, password: form.value.password };
+
+fetch('http://localhost:8008/api.php/usuarios', {
+method: 'POST',
+headers: {
+    'Content-Type': 'application/json'
+},
+body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(data => {
+    if (data.token) {
+        localStorage.setItem('token', data.token);
+        router.push('/home');
+    } else {
+        alert('Credenciales incorrectas');
+    }
+})
+.catch(error => console.error(error));
+}
 </script>
 
 <template>
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
-    <title>Registro</title>
-</head>
-<body class="layout-centered">
-    <section class="auth-container">
-        <h2>Registro</h2>
-        <form id="signupForm">
-            <label class="form-label">Nombre</label>
-            <input type="text" placeholder="..." id="name" class="form-control" required>
-            <label class="form-label">Mail</label>
-            <input type="email" placeholder="..." id="email" class="form-control" required>
-            <label class="form-label">Contraseña</label>
-            <input type="password" placeholder="..." id="password" class="form-control" required>
-            <input type="submit" value="Registro" class="btn btn-primary">
-        </form>
-        <p>¿Ya tienes una cuenta? <a href="login.html">Login</a></p>
-    </section>
-    <script src="js/signup.js"></script>
-</body>
-</html>
+    <form @submit.prevent="register" class="d-flex  align-items-center gap-2">
+        <label for="name">Nombre</label>
+        <input v-model="form.name" type="text" id="name" class="form-control " placeholder="Nombre" required />
+        <label for="email">Email</label>
+        <input v-model="form.email" type="text" id="email" class="form-control " placeholder="Email" required />
+        <label for="password">Contraseña</label>
+        <input v-model="form.password" type="password" class="form-control " placeholder="Contraseña" required />
+        <button type="submit" class="btn btn-success">Registrarse</button>
+    </form>
 </template>
