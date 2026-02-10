@@ -1,44 +1,61 @@
-<script>
+<script setup>
 import { ref } from 'vue';
-import router from '@/router';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const form = ref({
-    name: '',
+    nombre: '',
     email: '',
     password: ''
-})
+});
 
-function register() {
-const data = { name: form.value.name, email: form.value.email, password: form.value.password };
+function register() { 
+    const userData = {
+        nombre: form.value.nombre,
+        email: form.value.email,
+        contraseña: form.value.password
+    };
 
-fetch('http://localhost:8008/api.php/usuarios', {
-method: 'POST',
-headers: {
-    'Content-Type': 'application/json'
-},
-body: JSON.stringify(data)
-})
-.then(response => response.json())
-.then(data => {
-    if (data.token) {
-        localStorage.setItem('token', data.token);
-        router.push('/home');
-    } else {
-        alert('Credenciales incorrectas');
-    }
-})
-.catch(error => console.error(error));
+    fetch('http://localhost/freetours/api.php/usuarios', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Respuesta:', data); 
+        alert('Usuario creado correctamente');
+        router.push('/login');
+    })
+    .catch(error => console.error('Error:', error));
 }
 </script>
 
 <template>
-    <form @submit.prevent="register" class="d-flex  align-items-center gap-2">
-        <label for="name">Nombre</label>
-        <input v-model="form.name" type="text" id="name" class="form-control " placeholder="Nombre" required />
-        <label for="email">Email</label>
-        <input v-model="form.email" type="text" id="email" class="form-control " placeholder="Email" required />
-        <label for="password">Contraseña</label>
-        <input v-model="form.password" type="password" class="form-control " placeholder="Contraseña" required />
-        <button type="submit" class="btn btn-success">Registrarse</button>
-    </form>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Registro de Usuario</h2>
+      <form @submit.prevent="register">
+        <div class="input-group">
+          <label>Nombre Completo</label>
+          <input v-model="form.nombre" type="text" placeholder="Tu nombre" required />
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input v-model="form.email" type="email" placeholder="email@ejemplo.com" required />
+        </div>
+        <div class="input-group">
+          <label>Contraseña</label>
+          <input v-model="form.password" type="password" placeholder="Contraseña" required />
+        </div>
+        <button type="submit" class="btn-submit">Crear Cuenta</button>
+      </form>
+    </div>
+  </div>
 </template>
+<style scoped>
+
+</style>
