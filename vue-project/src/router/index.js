@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/Loginview.vue'
 import RegisterView from '../views/Registerview.vue'
-import UsuarioView from '../views/UsuarioView.vue'
+import UsuarioView from '../views/UsuariosView.vue'
 import CoreuiVue from '@coreui/vue'
 
 
