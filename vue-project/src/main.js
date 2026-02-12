@@ -7,7 +7,6 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 import '@coreui/coreui/dist/css/coreui.min.css';
 
-
 const app = createApp(App)
 
 app.use(router)
