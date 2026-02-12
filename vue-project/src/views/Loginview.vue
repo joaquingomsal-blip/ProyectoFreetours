@@ -1,14 +1,24 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { CToaster, CToast, CToastHeader, CToastBody } from '@coreui/vue';
 
 const router = useRouter();
+const toasts = ref([]);
 
-// Definimos el formulario con ref
 const form = ref({
     email: '',
     password: '' 
 });
+
+const addToast = (titulo, mensaje, color = 'primary') => {
+    toasts.value.push({
+        id: Date.now(),
+        title: titulo,
+        content: mensaje,
+        color: color
+    });
+};
 
 function login() {
     const loginData = {
@@ -18,200 +28,88 @@ function login() {
 
     fetch('http://localhost/freetours/api.php/usuarios?login', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData)
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            console.log('Login exitoso:', data.user);
+            addToast('Éxito', 'Iniciando sesión...', 'success');
             
-            // Guardamos el objeto usuario entero para saber su ROL luego
             localStorage.setItem('user', JSON.stringify(data.user));
             
-            // Redirigimos a la home
-            router.push('/').then(() => {
-                window.location.reload()
-            })
+            setTimeout(() => {
+                router.push('/').then(() => {
+                    window.location.reload();
+                });
+            }, 1000);
         } else {
-            console.log('Error de login:', data.message);
-            alert('Error: ' + data.message);
+            addToast('Error de acceso', data.message, 'danger');
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        addToast('Error', 'Problema de conexión con el servidor', 'danger');
+    });
 }
 </script>
 
 <template>
-  <div class="login-page">
-    <div class="login-card">
-      <h2>Iniciar Sesión</h2>
-      <form @submit.prevent="login">
-        <div class="form-group">
-          <label>Email</label>
-          <input v-model="form.email" type="email" placeholder="email@ejemplo.com" required />
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    
+    <div class="card shadow-lg border-0 p-4 rounded-4" style="max-width: 400px; width: 100%; background: rgba(255, 255, 255, 0.98);">
+      <div class="card-body">
+        <h2 class="text-center mb-4 fw-bold text-dark">Iniciar Sesión</h2>
+        
+        <form @submit.prevent="login">
+          <div class="mb-3">
+            <label class="form-label fw-bold text-secondary small">Email</label>
+            <input v-model="form.email" type="email" class="form-control form-control-lg border-2" placeholder="email@ejemplo.com" required/>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold text-secondary small">Contraseña</label>
+            <input v-model="form.password" type="password" class="form-control form-control-lg border-2" placeholder="Tu contraseña" required />
+          </div>
+
+          <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm py-2">
+            Entrar
+          </button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <span class="text-muted small">¿No tienes cuenta? </span>
+            <RouterLink to="/register" class="text-success fw-bold text-decoration-none small">Regístrate aquí</RouterLink>
         </div>
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input v-model="form.password" type="password" placeholder="Tu contraseña" required />
-        </div>
-        <button type="submit" class="btn-login">Entrar</button>
-      </form>
+      </div>
     </div>
+
+    <CToaster class="p-3" placement="top-end">
+        <CToast v-for="toast in toasts" :key="toast.id" visible :color="toast.color">
+            <CToastHeader closeButton>
+                <span class="me-auto fw-bold text-dark">{{ toast.title }}</span>
+            </CToastHeader>
+            <CToastBody class="text-dark">{{ toast.content }}</CToastBody>
+        </CToast>
+    </CToaster>
+
   </div>
 </template>
+
 <style scoped>
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 100px); 
+.form-control:focus {
+    border-color: #00BB77;
+    box-shadow: 0 0 0 0.25rem rgba(0, 187, 119, 0.15);
 }
 
-.login-card {
-  background: rgba(255, 255, 255, 0.95); 
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 380px;
-  backdrop-filter: blur(5px);
+.btn-success {
+    background-color: #00BB77;
+    border-color: #00BB77;
 }
 
-h2 {
-  text-align: center;
-  color: #2c3e50;
-  margin-bottom: 2rem;
-  font-weight: 700;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #4a5568;
-  font-size: 0.9rem;
-}
-
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #edf2f7;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-input:focus {
-  outline: none;
-  border-color: #42b983;
-  background-color: #fff;
-  box-shadow: 0 0 0 4px rgba(66, 185, 131, 0.1);
-}
-
-.btn-login {
-  width: 100%;
-  padding: 0.85rem;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.3s;
-  margin-top: 1rem;
-}
-
-.btn-login:hover {
-  background-color: #3aa876;
-  transform: translateY(-1px);
-}
-
-.btn-login:active {
-  transform: translateY(0);
-}
-</style><style scoped>
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 100px); 
-}
-
-.login-card {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 380px;
-  backdrop-filter: blur(5px);
-}
-
-h2 {
-  text-align: center;
-  color: #2c3e50;
-  margin-bottom: 2rem;
-  font-weight: 700;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #4a5568;
-  font-size: 0.9rem;
-}
-
-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #edf2f7;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-input:focus {
-  outline: none;
-  border-color: #42b983;
-  background-color: #fff;
-  box-shadow: 0 0 0 4px rgba(66, 185, 131, 0.1);
-}
-
-.btn-login {
-  width: 100%;
-  padding: 0.85rem;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.3s;
-  margin-top: 1rem;
-}
-
-.btn-login:hover {
-  background-color: #3aa876;
-  transform: translateY(-1px);
-}
-
-.btn-login:active {
-  transform: translateY(0);
+.btn-success:hover {
+    background-color: #00a66a;
+    transform: translateY(-1px);
+    transition: all 0.2s;
 }
 </style>

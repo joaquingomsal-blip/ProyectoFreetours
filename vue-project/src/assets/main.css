@@ -1,35 +1,51 @@
 @import './base.css';
 
+/* Elimina las restricciones de ancho y el centrado forzado */
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   font-weight: normal;
 }
 
+/* Ajustes globales para enlaces */
 a,
 .green {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
+  color: #00BB77; /* Tu verde FreeTours */
   transition: 0.4s;
   padding: 3px;
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    background-color: rgba(0, 187, 119, 0.2);
+    border-radius: 4px;
   }
 }
 
+
+
 @media (min-width: 1024px) {
   body {
-    display: flex;
-    place-items: center;
+    /* Eliminamos display: flex y place-items: center */
+    display: block; 
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    /* Eliminamos el grid de 2 columnas que achicaba tu tabla */
+    display: block; 
+    grid-template-columns: none;
+    padding: 0;
   }
+}
+
+/* Estilo base para que el contenido no se pegue a los bordes 
+   pero que no restrinja el ancho máximo de forma agresiva */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%) !important;
+  color: #ffffff !important;
+  min-height: 100vh;
 }
