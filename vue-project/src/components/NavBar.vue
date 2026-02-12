@@ -26,60 +26,75 @@ const logout = () => {
 </script>
 
 <template>
-  <header>
-    <div class="logo">FreeTours</div>
-    <nav>
-      <RouterLink to="/">Inicio</RouterLink>
+  <div class="p-3 bg-freetours shadow-sm d-flex align-items-center fixed-top w-100 text-white">
+    <button class="btn btn-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+      <span class="navbar-toggler-icon" style="filter: invert(0);"></span> Menu
+    </button>
+    <div class="fs-4 fw-bold">FreeTours</div>
+  </div>
 
-      <template v-if="!usuario">
-        <RouterLink to="/login">Iniciar Sesion</RouterLink>
-        <RouterLink to="/register">Registro</RouterLink>
-      </template>
+  <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel" style="width: 280px;">
+    <div class="offcanvas-header border-bottom border-secondary">
+      <h5 class="offcanvas-title" id="sidebarMenuLabel">FreeTours</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <div class="offcanvas-body d-flex flex-column p-0">
+      <ul class="nav nav-pills flex-column mb-auto mt-3">
+        <li class="nav-item px-3 mb-2">
+          <RouterLink to="/" class="nav-link text-white" active-class="active bg-success">
+            Inicio
+          </RouterLink>
+        </li>
 
-      <template v-else>
-        <RouterLink v-if="usuario.rol === 'admin'" to="/usuarios">Administrar usuarios</RouterLink>
-        <span class="user-info">Hola, {{ usuario.nombre }}</span>
-        <button @click="logout" class="btn-logout">Salir</button>
-      </template>
-    </nav>
-  </header>
-  </template>
+        <template v-if="!usuario">
+          <li class="nav-item px-3 mb-2">
+            <RouterLink to="/login" class="nav-link text-white" active-class="active bg-success">Iniciar Sesión</RouterLink>
+          </li>
+          <li class="nav-item px-3 mb-2">
+            <RouterLink to="/register" class="nav-link text-white" active-class="active bg-success">Registro</RouterLink>
+          </li>
+        </template>
+
+        <template v-else>
+          <li v-if="usuario.rol === 'admin'" class="nav-item px-3 mb-2">
+            <RouterLink to="/usuarios" class="nav-link text-white" active-class="active bg-success">
+              Administrar usuarios
+            </RouterLink>
+          </li>
+        </template>
+      </ul>
+
+      <div v-if="usuario" class="p-3 border-top border-secondary">
+        <div class="mb-3">
+            <small class="text-secondary d-block">Conectado como:</small>
+            <span class="fw-bold">{{ usuario.nombre }}</span>
+        </div>
+        <button @click="logout" class="btn btn-danger w-100">Cerrar Sesión</button>
+      </div>
+    </div>
+  </div>
+</template>
+
 <style scoped>
-*{
-    color: white;
+.bg-freetours {
+    background-color: #00BB77;
 }
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  background-color: #00BB77;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 5%;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-  color: white;
+
+.nav-link {
+    transition: 0.3s;
+    border-radius: 8px;
 }
-nav {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  color: white  ;
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
-.user-info { 
-    margin-left: 1rem; 
-    font-weight: bold; 
-    color: white; 
-}
-.btn-logout { 
-  background: #ff4757; 
-  color: white; 
-  border: none; 
-  padding: 8px 15px; 
-  border-radius: 6px; 
-  cursor: pointer;
+
+/* Ajuste para que el contenido de la página no empiece debajo del botón fixed */
+
+
+.offcanvas-body .nav-link {
+    font-size: 1.1rem;
+    padding: 10px 15px;
 }
 </style>
