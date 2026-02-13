@@ -62,7 +62,13 @@ const logout = () => {
               Administrar usuarios
             </RouterLink>
           </li>
+          <li v-if="usuario.rol === 'admin'" class="nav-item px-3 mb-2">
+            <RouterLink to="/rutas" class="nav-link text-white" active-class="active bg-success">
+              Administrar rutas
+            </RouterLink>
+          </li>
         </template>
+
       </ul>
 
       <div v-if="usuario" class="p-3 border-top border-secondary">

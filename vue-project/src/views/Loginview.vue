@@ -97,7 +97,6 @@ function login() {
 </template>
 
 <style scoped>
-/* Solo un par de retoques para mantener el estilo original de los inputs */
 .form-control:focus {
     border-color: #00BB77;
     box-shadow: 0 0 0 0.25rem rgba(0, 187, 119, 0.15);
