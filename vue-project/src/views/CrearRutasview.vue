@@ -25,8 +25,6 @@ onMounted(() => {
     }).addTo(map);
     map.on('click', (e) => {
         const { lat, lng } = e.latlng;
-        
-        // Guardamos en nuestro objeto reactivo
         rutas.value.latitud = lat.toFixed(6);
         rutas.value.longitud = lng.toFixed(6);
 
