@@ -9,15 +9,18 @@ const rutas = ref([])
 const filtro = ref('')
 const usuarioLogeado = ref(localStorage.getItem('user'));
 const rutaActiva = ref(null);
-const cantidadAsistentes = ref(1); // Aprovechamos para definir el contador de la reserva
+const fecha = ref('');
 
 function abrirDetalles(ruta) {
   rutaActiva.value = ruta;
-
   usuarioLogeado.value = localStorage.getItem('user');
-  const modal = new bootstrap.Modal(document.getElementById('modalLogin'));
-  modal.show();
 
+  const modalElement = document.getElementById('modalLogin');
+  let modal = bootstrap.Modal.getInstance(modalElement);
+  if (!modal) {
+      modal = new bootstrap.Modal(modalElement);
+  }
+  modal.show();
 }
 
 const irLogin = () => {
@@ -34,8 +37,13 @@ const cargarDatos = () => {
         usuario.value = JSON.parse(datos)
     }
     
-    // FETCH a tu API de rutas
     fetch('http://localhost/freetours/api.php/rutas')
+        .then(res => res.json())
+        .then(data => rutas.value = data)
+        .catch(err => console.error("Error cargando rutas:", err))
+}
+const buscarFecha = () => {
+    fetch(`http://localhost/freetours/api.php/rutas?fecha=${fecha.value}`)
         .then(res => res.json())
         .then(data => rutas.value = data)
         .catch(err => console.error("Error cargando rutas:", err))
@@ -43,36 +51,54 @@ const cargarDatos = () => {
 
 onMounted(cargarDatos)
 
-// Buscador por localidad o título (Requisito PDF) [cite: 55, 56]
 const rutasFiltradas = computed(() => {
     return rutas.value.filter(r => 
         r.localidad.toLowerCase().includes(filtro.value.toLowerCase()) ||
         r.titulo.toLowerCase().includes(filtro.value.toLowerCase())
     )
 })
+
+//NO OLVIDR COMPLETAR
+const irReserva = (idRuta) => {
+    const modalElement = document.getElementById('modalLogin');
+    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+
+    localStorage.setItem('ruta_id_seleccionada', idRuta);
+    setTimeout(() => {
+        router.push({ 
+            path: '/reservas', 
+            query: { rutaId: idRuta }
+        });
+    }, 150);
+}
 </script>
 
 <template>
+  <!--VIDEO-->
   <div class="landing-page" style="background-color: #FFF9F0;">
-    
     <div class="video-hero">
       <video autoplay muted loop playsinline class="video-bg">
         <source src="@/assets/video.mp4" type="video/mp4">
       </video>
       <div class="overlay d-flex align-items-center justify-content-center">
         <div class="text-center text-white px-3">
-          <h1 class="display-1 fw-bold mb-2 gold-text">HORA DORADA</h1>
-          <p class="fs-3 mb-0 text-light opacity-75">Descubre la magia de cada ciudad al alardecer</p> 
+          <h1 class="display-1 fw-bold mb-2 gold-text">Freetours</h1>
+          <p class="fs-3 mb-0 text-light opacity-75">Prueba de texto</p> 
         </div>
       </div>
     </div>
 
+      <!--ARREGLAR BUSCAR-->
+      <!--Buscar-->
     <div class="container mt-n5 position-relative z-index-2">
-      
       <div class="row justify-content-center mb-5">
         <div class="col-md-8">
           <div class="search-box p-2 bg-white shadow-lg rounded-pill d-flex align-items-center">
-            <span class="ms-3 fs-4">🔎</span>
+            <span class="ms-3 fs-4"></span>
             <input type="text" v-model="filtro" 
                    class="form-control border-0 shadow-none bg-transparent py-3 ps-3" 
                    placeholder="¿Qué ciudad quieres explorar? (Ej: Granada, Jaén...)"> 
@@ -80,12 +106,27 @@ const rutasFiltradas = computed(() => {
           </div>
         </div>
       </div>
+      <!--Buscar Por Fecha-->
+     <div>
+      <div class="row justify-content-center mb-5">
+        <div class="col-md-8">
+          <div class="search-box p-2 bg-white shadow-lg rounded-pill d-flex align-items-center">
+            <span class="ms-3 fs-4"></span>
+            <input type="date" v-model="fecha" 
+                   class="form-control border-0 shadow-none bg-transparent py-3 ps-3" 
+                   placeholder="¿Qué ciudad quieres explorar? (Ej: Granada, Jaén...)"> 
+            <button class="btn btn-gold rounded-pill px-4 py-2 me-2 fw-bold" @click="buscarFecha">BUSCAR</button>
+          </div>
+        </div>
+      </div>
+     </div>
 
+     <!--TARJETAS RUTAS-->
       <div class="row mb-4">
         <div class="col text-center">
           <h2 class="fw-bold display-6" style="color: #2D241E;">Nuestras Rutas</h2>
           <div class="divider mx-auto mb-4"></div>
-          <p v-if="usuario" class="text-muted">Hola, {{ usuario.nombre }}. Tienes acceso a reservas.</p> [cite: 5]
+          <p v-if="usuario" class="text-muted">Hola, {{ usuario.nombre }}.</p>
         </div>
       </div>
 
@@ -93,19 +134,19 @@ const rutasFiltradas = computed(() => {
         <div class="col" v-for="ruta in rutasFiltradas" :key="ruta.id">
           <div class="card h-100 border-0 shadow-sm tour-card">
             <div class="position-relative">
-                <img :src="ruta.foto || '/placeholder.jpg'" class="card-img-top" :alt="ruta.titulo"> [cite: 18, 60]
+                <img :src="ruta.foto || '/placeholder.jpg'" class="card-img-top" :alt="ruta.titulo">
                 <div class="badge-date">{{ ruta.fecha }}</div> 
             </div>
             
             <div class="card-body p-4">
-              <h5 class="card-title fw-bold mb-2" style="color: #2D241E;">{{ ruta.titulo }}</h5> [cite: 61]
-              <p class="text-amber mb-3 small">📍 {{ ruta.localidad }}</p>
-              <p class="card-text text-muted small mb-0">{{ ruta.descripcion }}</p> [cite: 17, 63]
+              <h5 class="card-title fw-bold mb-2" style="color: #2D241E;">{{ ruta.titulo }}</h5> 
+              <p class="text-amber mb-3 small"> {{ ruta.localidad }}</p>
+              <p class="card-text text-muted small mb-0">{{ ruta.descripcion }}</p>
             </div>
 
             <div class="card-footer bg-white border-0 p-4 pt-0">
               <button @click="abrirDetalles(ruta)" class="btn btn-outline-dark w-100 rounded-pill fw-bold">
-                {{ usuario ? 'Ver detalles y Reservar' : 'Ver más información' }} 
+                Ver Detalles 
               </button>
             </div>
           </div>
@@ -126,25 +167,29 @@ const rutasFiltradas = computed(() => {
     <div class="modal-content">
       
       <div class="modal-header">
-        <h5 class="modal-title">Título del Modal</h5>
+        <h5 class="modal-title">Detalles de la Ruta</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-    <h3>{{ rutaActiva?.ruta_titulo }}</h3>
-    <p>{{ rutaActiva?.ruta_descripcion }}</p>
-    <p><strong>Punto de encuentro:</strong> {{ rutaActiva?.punto_encuentro }}</p>
-
+      <!--CUERPO MODAL-->
+    <div class="modal-body">
+      <h3>{{ rutaActiva?.titulo }}</h3>
+        <p>{{ rutaActiva?.descripcion }}</p>
+        <p><strong>Fecha:</strong> {{ rutaActiva?.fecha }}</p>
+        <p><strong>Hora</strong>{{ rutaActiva?.hora }}</p>
+        <p><strong>Punto de encuentro:</strong></p>
+    <div v-if="rutaActiva?.latitud && rutaActiva?.longitud">
+      <p class="small text-muted">Pulsa para ver en Google Maps</p>
+      <a :href="'https://www.google.com/maps/search/?api=1&query=' + rutaActiva.latitud + ',' + rutaActiva.longitud" target="_blank" rel="noopener">Abrir</a>
+    </div>
     <hr> <div v-if="usuarioLogeado">
         <h5>Realizar Reserva</h5>
         <div class="mb-3">
-            <label>Asistentes (Máximo 8):</label>
-            <input type="number" v-model="cantidadAsistentes" min="1" max="8" class="form-control">
         </div>
-        <button class="btn btn-success w-100" @click="hacerReserva">
-            Confirmar Reserva
-        </button>
+        <button class="btn btn-success w-100" @click="irReserva(rutaActiva?.id)">
+      Confirmar Reserva
+    </button>
     </div>
-
+    <!--SI NO ESTA LOGEADO-->
     <div v-else class="alert alert-info border-0 rounded-4">
         <p class="mb-3">Debes estar registrado para poder realizar una reserva en esta ruta.</p>
         <div class="d-flex gap-2">
@@ -159,10 +204,9 @@ const rutasFiltradas = computed(() => {
 </template>
 
 <style scoped>
-/* HERO Y VIDEO */
 .video-hero {
   position: relative;
-  height: 70vh; /* Ajustado para que se vea el inicio del contenido */
+  height: 70vh;
   width: 100%;
   overflow: hidden;
 }
@@ -192,9 +236,8 @@ const rutasFiltradas = computed(() => {
   text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
 }
 
-/* BUSCADOR */
 .mt-n5 {
-  margin-top: -50px; /* Hace que el buscador "suba" un poco sobre el video */
+  margin-top: -50px; 
 }
 
 .search-box {
@@ -215,7 +258,7 @@ const rutasFiltradas = computed(() => {
   background-color: #E69500;
 }
 
-/* CARDS */
+
 .tour-card {
   border-radius: 20px;
   overflow: hidden;

@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// 1. ESTADO DEL FORMULARIO [cite: 14, 22, 28]
 const rutas = ref({
     titulo: '',
     localidad: '',
@@ -13,39 +12,32 @@ const rutas = ref({
     latitud: '', 
     longitud: '', 
     guia_id: '',
-    foto: '' // Puedes guardar aquí la URL de la foto general [cite: 18]
+    foto: '',
 });
 
-// 2. ESTADO DE LA UI
-const guiasLibres = ref([]);
+
+
 const address = ref('');
 const mensaje = ref('');
 const tipoAlerta = ref('success');
 const mostrarAlerta = ref(false);
+const guiasLibres = ref([]);
 
 let map;
 let marker;
 
-// 3. FUNCIONES DE LÓGICA
-
-// Buscar guías que no tengan rutas ese día
-const buscarGuiasDisponibles = () => {
-    if (!rutas.value.fecha) return;
-
-    // Nota: La URL debe coincidir con tu API para filtrar por fecha y rol
-    fetch(`http://localhost/freetours/api.php/usuarios?rol=guia&disponible_en=${rutas.value.fecha}`)
-        .then(res => res.json())
+function buscarGuias() {
+    const fechaElegida = rutas.value.fecha;
+    fetch(`http://localhost/freetours/api.php/asignaciones?fecha=${fechaElegida}`)
+        .then(response => response.json())
         .then(data => {
-            guiasLibres.value = data.filter(usuario => usuario.rol === 'guia');
-            // Si el guía seleccionado ya no está disponible, reseteamos el campo
-            if (!guiasLibres.value.find(g => g.id === rutas.value.guia_id)) {
-                rutas.value.guia_id = '';
-            }
+            guiasLibres.value = data; 
+            console.log('Estos guías están libres:', data);
         })
-        .catch(err => console.error("Error al filtrar guías:", err));
-};
+        .catch(error => console.error('Error:', error));
+}
 
-// Buscador de direcciones (Geocoding) 
+//Geocoding 
 const buscarDireccion = () => {
     if (address.value.length < 3) return;
 
@@ -73,7 +65,7 @@ const buscarDireccion = () => {
         .catch(error => console.error('Error en geocoding:', error));
 };
 
-// Enviar el formulario a la API 
+
 const crear_ruta = () => {
     fetch('http://localhost/freetours/api.php/rutas', {
         method: 'POST',
@@ -82,11 +74,11 @@ const crear_ruta = () => {
     })
     .then(res => res.json())
     .then(data => {
-        mensaje.value = "✅ Ruta creada y guía asignado correctamente";
+        mensaje.value = "Ruta creada y guía asignado correctamente";
         tipoAlerta.value = "success";
         mostrarAlerta.value = true;
         
-        // Limpiar formulario tras éxito
+        // Limpiar formulario
         Object.keys(rutas.value).forEach(key => rutas.value[key] = '');
         if (marker) map.removeLayer(marker);
         address.value = '';
@@ -94,13 +86,12 @@ const crear_ruta = () => {
         setTimeout(() => mostrarAlerta.value = false, 3000);
     })
     .catch(err => {
-        mensaje.value = "❌ Error al guardar la ruta";
+        mensaje.value = "Error al guardar la ruta";
         tipoAlerta.value = "danger";
         mostrarAlerta.value = true;
     });
 };
 
-// 4. INICIALIZACIÓN DEL MAPA 
 onMounted(() => {
     map = L.map('map-container').setView([37.77, -3.78], 13);
 
@@ -123,14 +114,15 @@ onMounted(() => {
 </script>
 
 <template>
+    <!--MENSAJE CREACION RUTA-->
     <div class="container mt-5 p-5">
         <transition name="fade">
-            <div v-if="mostrarAlerta" :class="['alert', 'alert-' + tipoAlerta, 'fixed-top', 'm-3', 'shadow']" role="alert">
+            <div v-if="mostrarAlerta" :class="['alert', 'alert-' + tipoAlerta, 'sticky-top', 'mt-3', 'shadow']" role="alert">
                 {{ mensaje }}
             </div>
         </transition>
 
-        <div class="card shadow p-4">
+        <div class="card shadow p-4 mt-5">
             <h1 class="text-center mb-4 text-primary">Crear Nueva Ruta</h1>
             
             <form @submit.prevent="crear_ruta" class="row g-3">
@@ -171,12 +163,13 @@ onMounted(() => {
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Enlace de la imagen</label>
-                    <input type="url" class="form-control" v-model="rutas.imagen" placeholder="https://example.com/image.jpg" required>
+                    <input v-model="rutas.foto" type="text" class="form-control rounded-pill shadow-sm" placeholder="/fotos/nombre-imagen.jpg">
                 </div>
+
 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Fecha</label>
-                    <input type="date" class="form-control" v-model="rutas.fecha" @change="buscarGuiasDisponibles" required>
+                    <input type="date" class="form-control" v-model="rutas.fecha"required @change="buscarGuias">
                 </div>
 
                 <div class="col-md-6">
@@ -184,20 +177,18 @@ onMounted(() => {
                     <input type="time" class="form-control" v-model="rutas.hora" required>
                 </div>
 
-                <div class="col-12">
-                    <label class="form-label fw-bold">Asignar Guía para este día</label>
-                    <select class="form-select border-primary" v-model="rutas.guia_id" :disabled="!rutas.fecha" required>
-                        <option value="" disabled>
-                            {{ rutas.fecha ? '--- Seleccione un Guía disponible ---' : ' Selecciona primero la fecha' }}
-                        </option>
-                        <option v-for="guia in guiasLibres" :key="guia.id" :value="guia.id">
-                             {{ guia.nombre }}
-                        </option>
-                    </select>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Seleccionar Guia</label>
+                   
+                        <select v-model="rutas.guia_id">
+                            <option value="">Seleccionar Guia</option>
+                            <option v-for="guia in guiasLibres" :key="guia.id" :value="guia.id">
+                            {{ guia.nombre }}
+                            </option>
+                        </select>
                 </div>
-
                 <div class="col-12 mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow">🚀 Publicar Ruta</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow">Publicar Ruta</button>
                 </div>
             </form>
         </div>

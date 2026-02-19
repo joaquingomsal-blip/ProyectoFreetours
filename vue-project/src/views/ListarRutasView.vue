@@ -2,17 +2,17 @@
 import { ref, onMounted } from 'vue';
 import * as bootstrap from 'bootstrap'; 
 
-// 1. ESTADO
+
 const rutas = ref([]);
 const rutaSeleccionada = ref(null);
-const asistentes = ref([]); // Lista para los inscritos
+const asistentes = ref([]); 
 const cargandoAsistentes = ref(false);
 
-// Estados para el Toast
+// TOAST
 const mensajeToast = ref('');
 const tipoToast = ref('success');
 
-// 2. LÓGICA DE CARGA
+
 const cargarRutas = () => {
     fetch('http://localhost/freetours/api.php/rutas')
         .then(response => response.json())
@@ -25,7 +25,6 @@ const cargarRutas = () => {
         });
 };
 
-// 3. LÓGICA DE NOTIFICACIONES (TOASTS)
 const mostrarToast = (texto, tipo = 'success') => {
     mensajeToast.value = texto;
     tipoToast.value = tipo;
@@ -34,27 +33,30 @@ const mostrarToast = (texto, tipo = 'success') => {
     toast.show();
 };
 
-// 4. LÓGICA DEL MODAL ASISTENTES (NUEVO)
+//ARREGLAR PARA QUE FUNCIONE BIEN
 const verAsistentes = (ruta) => {
+    asistentes.value = []; 
     rutaSeleccionada.value = ruta;
-    asistentes.value = [];
     cargandoAsistentes.value = true;
 
-    const modalInscritos = new bootstrap.Modal(document.getElementById('modalAsistentes'));
-    modalInscritos.show();
+    const modalElement = document.getElementById('modalAsistentes');
+    let modalInstance = bootstrap.Modal.getInstance(modalElement);
+    if (!modalInstance) modalInstance = new bootstrap.Modal(modalElement);
+    modalInstance.show();
 
-    fetch(`http://localhost/freetours/api.php/inscritos?id_ruta=${ruta.id}`)
+    fetch(`http://localhost/freetours/api.php/reservas?id_ruta=${ruta.id}`)
         .then(res => res.json())
         .then(data => {
-            asistentes.value = data;
+           //Filtrar asistentes por ruta
+            asistentes.value = data.filter(a => a.ruta_id == ruta.id);
             cargandoAsistentes.value = false;
         })
-        .catch(() => {
+        .catch(err => {
+            console.error("Error:", err);
             cargandoAsistentes.value = false;
         });
 };
-
-// 5. LÓGICA DEL MODAL ELIMINAR
+//MODAL ELIMINAR RUTA
 const abrirConfirmacion = (ruta) => {
     rutaSeleccionada.value = ruta;
     const modalElement = document.getElementById('modalEliminar');
@@ -71,7 +73,7 @@ const confirmarCancelacion = () => {
     })
     .then(response => {
         if (response.ok) {
-            mostrarToast('✅ Ruta cancelada y eliminada correctamente');
+            mostrarToast('Ruta cancelada y eliminada correctamente');
             cargarRutas(); 
             const modalElement = document.getElementById('modalEliminar');
             const modal = bootstrap.Modal.getInstance(modalElement);
@@ -81,7 +83,7 @@ const confirmarCancelacion = () => {
         }
     })
     .catch(() => {
-        mostrarToast('❌ Error al eliminar la ruta', 'danger');
+        mostrarToast('Error al eliminar la ruta', 'danger');
     });
 };
 
@@ -96,11 +98,6 @@ onMounted(cargarRutas);
                     <h2 class="fw-bold display-6" style="color: #2D241E;">Gestión de Rutas</h2>
                     <p class="text-muted">Panel de administración para el control de asistencia y cancelaciones.</p>
                 </div>
-                <div class="col-auto">
-                    <button @click="cargarRutas" class="btn btn-gold rounded-pill px-4 shadow-sm">
-                        🔄 Actualizar Lista
-                    </button>
-                </div>
             </div>
 
             <div class="card shadow-lg border-0 overflow-hidden rounded-4">
@@ -109,7 +106,7 @@ onMounted(cargarRutas);
                         <table class="table table-hover mb-0 align-middle text-center">
                             <thead class="bg-dark-gold text-white text-uppercase small">
                                 <tr>
-                                    <th class="py-3">Estado</th>
+                                    <th class="py-3">Id</th>
                                     <th class="py-3">Título</th>
                                     <th class="py-3">Localidad</th>
                                     <th class="py-3">Inscritos</th>
@@ -119,14 +116,13 @@ onMounted(cargarRutas);
                             <tbody>
                                 <tr v-for="ruta in rutas" :key="ruta.id">
                                     <td>
-                                        <span v-if="ruta.n_inscritos < 10" class="fs-4" title="Menos de 10 inscritos">⚠️</span>
-                                        <span v-else class="text-success fs-4">✅</span>
+                                        {{ ruta.id }}                                       
                                     </td>
                                     <td class="fw-bold" style="color: #2D241E;">{{ ruta.titulo }}</td>
                                     <td>{{ ruta.localidad }}</td>
                                     <td>
                                         <button @click="verAsistentes(ruta)" class="btn btn-sm btn-light rounded-pill border shadow-sm px-3">
-                                            👁️ {{ ruta.n_inscritos || 0 }} / 10
+                                             {{ ruta.asistentes || 0 }} / 10
                                         </button>
                                     </td>
                                     <td>
@@ -145,7 +141,7 @@ onMounted(cargarRutas);
                 <p class="fs-5 text-muted">No hay rutas pendientes en el sistema.</p>
             </div>
         </div>
-
+        <!--MODAL ASISTENTES TERMINAR-->
         <div class="modal fade" id="modalAsistentes" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg">
@@ -156,7 +152,7 @@ onMounted(cargarRutas);
                     <div class="modal-body p-4">
                         <div class="mb-3 text-center">
                             <h4 class="fw-bold mb-0 text-amber" v-if="rutaSeleccionada">{{ rutaSeleccionada.titulo }}</h4>
-                            <p class="text-muted small">📍 {{ rutaSeleccionada?.localidad }} | 📅 {{ rutaSeleccionada?.fecha }}</p>
+                            <p class="text-muted small">{{ rutaSeleccionada?.localidad }} |  {{ rutaSeleccionada?.fecha }}</p>
                         </div>
 
                         <div v-if="cargandoAsistentes" class="text-center py-4">
@@ -166,10 +162,10 @@ onMounted(cargarRutas);
 
                         <div v-else-if="asistentes.length > 0">
                             <ul class="list-group list-group-flush">
-                                <li v-for="asistente in asistentes" :key="asistente.email" class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 bg-transparent">
+                                <li v-for="asistente in asistentes" :key="asistente.cliente_id" class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 bg-transparent">
                                     <div>
-                                        <div class="fw-bold text-dark">{{ asistente.nombre }}</div>
-                                        <div class="small text-muted">{{ asistente.email }}</div>
+                                        <div class="fw-bold text-dark">{{ asistente.usuario_nombre }}</div>
+                                        <div class="small text-muted">{{ asistente.num_personas }}</div>
                                     </div>
                                     <span class="badge rounded-pill bg-gold-soft text-gold">Confirmado</span>
                                 </li>
@@ -186,6 +182,7 @@ onMounted(cargarRutas);
             </div>
         </div>
 
+        <!--MODAL ELIMINAR-->
         <div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg">
@@ -194,7 +191,7 @@ onMounted(cargarRutas);
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-5 text-center">
-                        <div class="mb-3 fs-1">🗑️</div>
+                        <div class="mb-3 fs-1"></div>
                         <h4 class="fw-bold mb-3">¿Cancelar esta ruta?</h4>
                         <p class="text-muted" v-if="rutaSeleccionada">
                             Se eliminará <strong>"{{ rutaSeleccionada.titulo }}"</strong>. Esta acción no se puede deshacer.

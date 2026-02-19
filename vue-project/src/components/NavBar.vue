@@ -1,9 +1,10 @@
 <script setup>
+//CAMBIAR NOMBRE A SIDEBAR
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
-const route = useRoute() // Necesario para detectar la página actual
+const route = useRoute() 
 const usuario = ref(null)
 const scrolleado = ref(false)
 const esPaginaEstatica = ref(false)
@@ -17,7 +18,6 @@ const controlarScroll = () => {
     scrolleado.value = window.scrollY > 50
 }
 
-// Verifica si estamos en una página que NO es el Inicio
 const verificarRuta = () => {
     esPaginaEstatica.value = route.path !== '/'
 }
@@ -25,10 +25,9 @@ const verificarRuta = () => {
 onMounted(() => {
     cargarUsuario()
     window.addEventListener('scroll', controlarScroll)
-    verificarRuta() // Comprobar ruta al cargar
+    verificarRuta()
 })
 
-// Vigilamos el cambio de ruta para actualizar el comportamiento del Navbar
 watch(() => route.path, () => {
     verificarRuta()
 })
@@ -108,7 +107,7 @@ const logout = () => {
 .transition-text { transition: opacity 0.3s ease; }
 
 .bg-freetours { 
-    background-color: #FFB347 !important; /* Dorado cálido */
+    background-color: #FFB347 !important;
 }
 .bg-transparent { background-color: transparent !important; }
 
@@ -118,12 +117,11 @@ const logout = () => {
 .nav-link { border-radius: 8px; transition: 0.3s; }
 .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); }
 
-/* Color ámbar para el link activo en el sidebar */
 .bg-gold-active {
     background-color: #E69500 !important;
 }
 
 .offcanvas {
-    background-color: #2D241E !important; /* Marrón Golden Hour */
+    background-color: #2D241E !important; 
 }
 </style>

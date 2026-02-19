@@ -1,6 +1,5 @@
 @import './base.css';
 
-/* Elimina las restricciones de ancho y el centrado forzado */
 #app {
   width: 100%;
   margin: 0;
@@ -8,11 +7,11 @@
   font-weight: normal;
 }
 
-/* Ajustes globales para enlaces */
+
 a,
 .green {
   text-decoration: none;
-  color: #00BB77; /* Tu verde FreeTours */
+  color: #00BB77; 
   transition: 0.4s;
   padding: 3px;
 }
@@ -28,20 +27,18 @@ a,
 
 @media (min-width: 1024px) {
   body {
-    /* Eliminamos display: flex y place-items: center */
+
     display: block; 
   }
 
   #app {
-    /* Eliminamos el grid de 2 columnas que achicaba tu tabla */
+
     display: block; 
     grid-template-columns: none;
     padding: 0;
   }
 }
 
-/* Estilo base para que el contenido no se pegue a los bordes 
-   pero que no restrinja el ancho máximo de forma agresiva */
 body {
   margin: 40px !important;
   padding: 50px !important;

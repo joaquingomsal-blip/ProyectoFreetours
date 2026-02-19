@@ -7,6 +7,7 @@ import CrearRutasview from '../views/CrearRutasview.vue'
 import ListarRutasView from '@/views/ListarRutasView.vue'
 import AdminDashboardView from '@/views/AdminDashboardView.vue'
 import RutasAsignadasView from '@/views/RutasAsignadasView.vue'
+import HacerReservaView from '@/views/HacerReservaView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,12 +27,12 @@ const router = createRouter({
       name: 'register',
       component: RegisterView
     },
-    // RUTAS PROTEGIDAS PARA ADMIN
+  
     {
       path: '/usuarios',
       name: 'usuario',
       component: UsuarioView,
-      meta: { requiresAdmin: true } // Solo admin
+      meta: { requiresAdmin: true } 
     },
     {
       path: '/rutas',
@@ -60,18 +61,22 @@ const router = createRouter({
       path: '/asignadas',
       name: 'asignadas',
       component: () => import('../views/RutasAsignadasView.vue'),
-    }
+    },
+    {
+      path: '/reservas',
+      name: 'reservas',
+      component: () => import('../views/HacerReservaView.vue'),
+    },
   ],
 })
 
-// GUARDIÁN DE NAVEGACIÓN (Navigation Guard)
+
 router.beforeEach((to, from, next) => {
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
 
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     if (!user || user.rol !== 'admin') {
-      // Redirigimos al INDEX (home) con un query parameter de error
       next({ 
         path: '/', 
         query: { authError: 'no-admin' } 

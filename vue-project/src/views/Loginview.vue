@@ -98,17 +98,17 @@ function login() {
 
 <style scoped>
 .form-control:focus {
-    border-color: #00BB77;
+    border-color: #2D241E;
     box-shadow: 0 0 0 0.25rem rgba(0, 187, 119, 0.15);
 }
 
 .btn-success {
-    background-color: #00BB77;
-    border-color: #00BB77;
+    background-color: #E69500;
+    border-color: #2D241E;
 }
 
 .btn-success:hover {
-    background-color: #00a66a;
+    background-color: #E69500;
     transform: translateY(-1px);
     transition: all 0.2s;
 }

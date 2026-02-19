@@ -2,12 +2,10 @@
 import { ref, onMounted } from 'vue';
 import * as bootstrap from 'bootstrap';
 
-// 1. ESTADO
-const rutas = ref([]);         // Todas las rutas del guía
-const asistentes = ref([]);    // Lista de personas para la ruta abierta
-const rutaActiva = ref(null);  // La ruta que el guía está gestionando en ese momento
+const rutas = ref([]);         
+const asistentes = ref([]);    
+const rutaActiva = ref(null);  
 
-// 2. CARGAR RUTAS DEL GUÍA
 function CargarRutas() {
     const usuarioString = localStorage.getItem('user');
     
@@ -18,7 +16,6 @@ function CargarRutas() {
         fetch(`http://localhost/freetours/api.php/asignaciones?guia_id=${guia_id}`)
             .then(response => response.json())
             .then(data => {
-                // Guardamos solo en rutas.value
                 rutas.value = data;
             })
             .catch(error => {
@@ -27,20 +24,16 @@ function CargarRutas() {
     }
 }
 
-// 3. CARGAR ASISTENTES DE UNA RUTA
 function abrirGestionRuta(rutaPulsada) {
-    // Importante: Guardamos la ruta pulsada en la variable 'rutaActiva'
     rutaActiva.value = rutaPulsada;
-    asistentes.value = []; // Limpiamos la lista anterior
+    asistentes.value = [];
 
-    // Mostrar el Modal correctamente
     const modalElement = document.getElementById('modalAsistentes');
     if (modalElement) {
         const modalAsistentes = new bootstrap.Modal(modalElement);
         modalAsistentes.show();
     }
 
-    // Petición de inscritos
     fetch(`http://localhost/freetours/api.php/inscritos?id_ruta=${rutaPulsada.id}`)
         .then(response => response.json())
         .then(data => {
@@ -66,7 +59,7 @@ onMounted(CargarRutas);
                         
                         <div class="card-body">
                             <h5 class="fw-bold" style="color: #2D241E;">{{ ruta.ruta_titulo }}</h5>
-                            <p class="text-amber mb-2 small">📍 {{ ruta.ruta_localidad }}</p>
+                            <p class="text-amber mb-2 small"> {{ ruta.ruta_localidad }}</p>
                             <p class="text-muted small mb-0">{{ ruta.ruta_descripcion }}</p>
                         </div>
 
@@ -83,7 +76,7 @@ onMounted(CargarRutas);
                 <p class="text-muted fs-5">No tienes rutas asignadas actualmente.</p>
             </div>
         </div>
-
+        <!-- MODAL PARA VER ASISTENTES SIN TERMINAR-->
         <div class="modal fade" id="modalAsistentes" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
@@ -108,7 +101,7 @@ onMounted(CargarRutas);
                             </ul>
                         </div>
                         <div v-else class="text-center py-4">
-                            <div class="fs-1 mb-2">🤷‍♂️</div>
+                            <div class="fs-1 mb-2"></div>
                             <p class="text-muted">Aún no hay reservas confirmadas para esta ruta.</p>
                         </div>
                     </div>
@@ -119,11 +112,12 @@ onMounted(CargarRutas);
             </div>
         </div>
     </div>
+    <!--TERMINAR RUTAS ASIGANADAS-->
 </template>
 
 <style scoped>
 .admin-container {
-    background-color: #FFF9F0; /* Fondo Crema Golden Hour */
+    background-color: #FFF9F0; 
 }
 
 .text-amber {

@@ -1,4 +1,5 @@
 <script setup>
+//PAGINA DASHBOARD VISTA DE UN TEMPLATE
 import { ref, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
 
@@ -9,7 +10,7 @@ const stats = ref({
     totalGuias: 8
 });
 
-// Referencia al elemento del DOM para el gráfico
+
 const graficoCanvas = ref(null);
 
 const inicializarGrafico = () => {
@@ -44,7 +45,6 @@ const inicializarGrafico = () => {
 };
 
 onMounted(() => {
-    // Aquí cargarías tus stats reales de la API
     inicializarGrafico();
 });
 </script>
@@ -86,15 +86,15 @@ onMounted(() => {
                     <div class="card border-0 shadow-sm p-4 bg-dark-gold text-white mb-4">
                         <h5 class="fw-bold mb-3">Gestión Rápida</h5>
                         <div class="d-grid gap-2">
-                            <RouterLink to="/rutas" class="btn btn-gold btn-sm py-2">➕ Crear Nueva Ruta</RouterLink>
-                            <RouterLink to="/usuarios" class="btn btn-outline-light btn-sm py-2">👥 Ver Usuarios</RouterLink>
+                            <RouterLink to="/rutas" class="btn btn-gold btn-sm py-2">Crear Nueva Ruta</RouterLink>
+                            <RouterLink to="/usuarios" class="btn btn-outline-light btn-sm py-2"> Ver Usuarios</RouterLink>
                         </div>
                     </div>
                     
                     <div class="card border-0 shadow-sm p-4 h-100">
                         <h5 class="fw-bold mb-3 small text-uppercase text-muted">Aviso de Sistema</h5>
                         <div class="alert alert-warning border-0 small mb-0">
-                            <strong>⚠️ Rutas con bajo cupo:</strong> Hay 3 rutas con menos de 10 inscritos que requieren revisión.
+                            <strong>Rutas con bajo cupo:</strong> Hay 3 rutas con menos de 10 inscritos que requieren revisión.
                         </div>
                     </div>
                 </div>

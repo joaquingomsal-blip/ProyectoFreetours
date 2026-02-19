@@ -6,7 +6,6 @@ import * as Bootstrap from 'bootstrap';
 const usuarios = ref([]);
 const toasts = ref([]);
 
-// Variables para el modal
 const usuarioAEditar = ref(null);
 const nuevoRolPendiente = ref('');
 const usuarioABorrar = ref(null);
@@ -37,10 +36,8 @@ const prepararCambioRol = (usuario, event) => {
     usuarioAEditar.value = usuario;
     nuevoRolPendiente.value = event.target.value;
 
-    // Revertimos visualmente el select para que no cambie hasta confirmar
     event.target.value = usuario.rol;
 
-    // Abrimos el modal
     const modalElement = document.getElementById('rolModal');
     const modal = new Bootstrap.Modal(modalElement);
     modal.show();
@@ -50,7 +47,7 @@ const confirmarCambio = () => {
     if (usuarioAEditar.value) {
         actualizarRol(usuarioAEditar.value.id, nuevoRolPendiente.value);
         
-        // Cerramos el modal usando la instancia existente
+        
         const modalElement = document.getElementById('rolModal');
         const modalInstance = Bootstrap.Modal.getInstance(modalElement);
         modalInstance.hide();
@@ -73,16 +70,13 @@ const actualizarRol = (id, rol,) => {
 
 // --- ELIMINAR USUARIO ---
 const prepararEliminacion = (usuario) => {
-    // Guardamos los datos temporalmente
     usuarioABorrar.value = usuario;
-    // Abrimos el modal
     const modalElement = document.getElementById('eliminarModal');
     const modal = new Bootstrap.Modal(modalElement);
     modal.show();
 }
 
 const confirmarEliminacion = () => {
-    // Cerramos el modal usando la instancia existente
     if(usuarioABorrar.value) {
         borrarUsuario(usuarioABorrar.value.id);
         const modalElement = document.getElementById('eliminarModal');
@@ -195,7 +189,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-
+        <!-------------- TOASTS ------------>
         <CToaster class="p-3" placement="top-end">
             <CToast v-for="toast in toasts" :key="toast.id" visible :color="toast.color">
                 <CToastHeader closeButton>
